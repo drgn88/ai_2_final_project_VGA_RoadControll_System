@@ -11,7 +11,7 @@ module OV7670_Setting (
     logic        i_start;
     logic        o_done;
     logic        ack_error;
-    logic [ 2:0] rom_addr;
+    logic [ 7:0] rom_addr;
     logic [15:0] dout;
 
     SCCB_Master U_SCCB_Master (
@@ -34,10 +34,10 @@ module OV7670_Setting (
             if (o_done) begin
                 rom_addr <= rom_addr + 1;
             end
-            if (!rom_addr) begin
+            if (rom_addr < 5) begin
                 i_start <= 1;
             end else begin
-                i_start <= (rom_addr != 5) && o_done;
+                i_start <= 0;
             end
         end
     end
