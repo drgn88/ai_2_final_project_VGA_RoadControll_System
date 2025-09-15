@@ -139,7 +139,7 @@ module TrafficLight_FSM (
             UPDATE: begin
                 red_count_next = 0;
                 green_count_next = 0;
-                o_tr_light = 1'b0;
+                o_tr_light = 1'b1;
                 
                 temp_tr_next = traffic_sel;
                 tr_valid_next    = 1'b1; 
