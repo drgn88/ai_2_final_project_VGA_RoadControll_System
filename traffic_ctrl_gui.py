@@ -1,6 +1,4 @@
 
-
-
 import cv2
 import numpy as np
 import tkinter as tk
@@ -109,10 +107,10 @@ last_red_time = 0
 
 x_min_val, x_max_val, y_min_val, y_max_val = 0, 0, 0, 0
 
-pedestrian_texts = ["없음", "주의", "발생"]
+pedestrian_texts = ["없음", "발생"]
 vehicle_texts = ["적음", "보통", "많음"]
 
-pedestrian_colors = ["#7CFC00", "yellow", "red"]
+pedestrian_colors = ["#7CFC00", "red"]
 vehicle_colors = ["#7CFC00", "yellow", "red"]
 violation_colors = ["#7CFC00", "red"]
 
@@ -142,11 +140,11 @@ def uart_thread():
                 y_min_val = (packet[4] << 8) | packet[5]
                 y_max_val = (packet[6] << 8) | packet[7]
 
-                code6 = packet[8] & 0xFC
+                code6 = packet[8] & 0xF8
                 traffic_state = (code6 >> 7) & 0x1
-                pedestrian_state = (code6 >> 5) & 0x3
-                violation_state = (code6 >> 4) & 0x1
-                vehicle_state = (code6 >> 2) & 0x3
+                pedestrian_state = (code6 >> 6) & 0x1
+                violation_state = (code6 >> 5) & 0x1
+                vehicle_state = (code6 >> 3) & 0x3
 
 threading.Thread(target=uart_thread, daemon=True).start()
 
