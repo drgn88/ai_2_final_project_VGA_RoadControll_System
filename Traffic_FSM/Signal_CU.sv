@@ -26,7 +26,7 @@ module Signal_CU(
 
 );
 
- mux_3x1 U_MUX_FOR_RED_CNT(
+ mux_2x1 U_MUX_FOR_RED_CNT(
     .traffic_sel(o_tr_state),
      .a(30),
      .b(10),
@@ -34,7 +34,7 @@ module Signal_CU(
      .cnt_y(w_count_red)
 
 );
- mux_3x1 U_MUX_FOR_GREEN_CNT(
+ mux_2x1 U_MUX_FOR_GREEN_CNT(
     .traffic_sel(o_tr_state),
      .a(10),
      .b(30),
