@@ -9,7 +9,7 @@ module tick_sec (
 
 );
 
-    parameter F_COUNT = 10;  // 1초 
+    parameter F_COUNT = 100_000_000;  // 1초 
     logic [$clog2(F_COUNT)-1:0] r_counter;
 
 
@@ -33,11 +33,10 @@ module tick_sec (
     end
 endmodule
 
-module mux_3x1 (
-    input  logic [1:0] traffic_sel,
+module mux_2x1 (
+    input  logic traffic_sel,
     input  logic [4:0] a,
     input  logic [4:0] b,
-    input  logic [4:0] c,
     output logic [4:0] cnt_y
 
 );
@@ -45,17 +44,15 @@ module mux_3x1 (
     always_comb begin
          cnt_y = a;
         case (traffic_sel)
-            2'b00: begin
+            1'b0: begin
                 cnt_y = a;
 
             end
 
-            2'b01: begin
+            1'b1: begin
                 cnt_y = b;
             end
-            2'b10: begin
-                cnt_y = c;
-            end
+           
         endcase
 
 
@@ -71,7 +68,7 @@ module TrafficLight_FSM (
     input logic reset,
     input logic [4:0] howmany_count_red,
     input logic [4:0] howmany_count_green,
-    input logic [1:0] traffic_sel, //영상처리 유동랑 상태에 따른 SEL,
+    input logic traffic_sel, //영상처리 유동랑 상태에 따른 SEL,
     output logic o_tr_light,  //신호 상태 
     output logic [1:0] o_tr_state,  //유동량 상태
     output logic tr_valid,
@@ -87,7 +84,7 @@ module TrafficLight_FSM (
 
     logic [4:0] red_count_reg, red_count_next;
     logic [4:0] green_count_reg, green_count_next;
-    logic [1:0] temp_tr_reg, temp_tr_next;
+    logic temp_tr_reg, temp_tr_next;
     logic tr_valid_reg, tr_valid_next;
     logic light_valid_reg, light_valid_next;
 
