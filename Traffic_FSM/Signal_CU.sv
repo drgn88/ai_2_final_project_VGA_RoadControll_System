@@ -5,9 +5,9 @@
 module Signal_CU(
     input logic clk,
     input logic reset,
-    input logic [1:0] traffic_sel,
+    input logic traffic_sel,
     output logic o_tr_light,
-    output logic [1:0] o_tr_state,
+    output logic o_tr_state,
     output logic tr_valid,
     output logic light_valid
 
@@ -28,17 +28,17 @@ module Signal_CU(
 
  mux_3x1 U_MUX_FOR_RED_CNT(
     .traffic_sel(o_tr_state),
-    .a(20),
-    .b(30),
-    .c(10),
-    .cnt_y(w_count_red)
+     .a(30),
+     .b(10),
+    
+     .cnt_y(w_count_red)
 
 );
  mux_3x1 U_MUX_FOR_GREEN_CNT(
     .traffic_sel(o_tr_state),
-    .a(20),
-    .b(10),
-    .c(30),
+     .a(10),
+     .b(30),
+    
     .cnt_y(w_count_green)
 
 );
