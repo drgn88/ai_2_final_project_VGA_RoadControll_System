@@ -487,7 +487,7 @@ module wait_second (
     output logic o_tick
 );
 
-    localparam WAIT_SEC = 30000_0000;  //100Mhz -> 1sec
+    localparam WAIT_SEC = 500_000_000;  //100Mhz -> 1sec
     //localparam WAIT_SEC = 30;  //100Mhz -> 1sec
 
     typedef enum {
