@@ -126,7 +126,7 @@ module Signal_CU (
 
     mux_2x1 U_MUX_FOR_RED_CNT (
         .traffic_sel(o_tr_state),
-        .a(12),
+        .a(22),
         .b(31),
         .cnt_y(w_count_red)
 
@@ -136,7 +136,7 @@ module Signal_CU (
     mux_2x1 U_MUX_FOR_GREEN_CNT (
         .traffic_sel(o_tr_state),
         .a(31),
-        .b(12),
+        .b(22),
         .cnt_y(w_count_green)
     );
 
