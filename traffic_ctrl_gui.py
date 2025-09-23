@@ -1,4 +1,5 @@
 
+
 import cv2
 import numpy as np
 import tkinter as tk
@@ -36,7 +37,7 @@ main_title = tk.Label(title_frame, text="실시간 교통 관제 시스템",
 main_title.pack(expand=True, fill="both")
 
 # -----------------------------
-# 남은 시간 표시 (검은 박스 + ridge + PNG 숫자)
+# 남은 시간 표시 (FND)
 # -----------------------------
 time_frame = tk.Label(root, bg="black", width=30, height=10, bd=5, relief="ridge")
 time_frame.place(x=2200, y=40)
@@ -54,7 +55,6 @@ for i in range(10):
     digit_red_images.append(Image.open(f"digits_red_{i}.jpg").convert("RGBA"))
 
 def set_time_display(number, red=False):
-    # 2자리까지만 처리, 2자리 초과 시 무시
     if number > 99:
         return
     s = str(number).rjust(2, " ")
@@ -76,15 +76,17 @@ def update_time_position():
         time_frame.place(x=1830, y=35)
         time_labels[0].place(x=20, y=5)
         time_labels[1].place(x=110, y=5)
+        traffic_state_image_label.place(x=2050, y=40)  # FND 옆
     else:
-        time_frame.place(x=1470, y=1050)
+        time_frame.place(x=1400, y=1050)
         time_labels[0].place(x=20, y=5)
         time_labels[1].place(x=110, y=5)
+        traffic_state_image_label.place(x=1690, y=1050)  # 보행자 모드 FND 옆
 
 # -----------------------------
 # 카메라 설정
 # -----------------------------
-cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
 scale = 4
 qvga_height, qvga_width = 240, 320
 camera_width = qvga_width * scale
@@ -108,6 +110,16 @@ for file in signal_files:
     traffic_images.append(ImageTk.PhotoImage(img_composite))
 traffic_label = tk.Label(root, bg="#2b2b2b")
 traffic_label.place(x=1400, y=camera_y-50)
+
+# -----------------------------
+# Light / Heavy Traffic 이미지
+# -----------------------------
+traffic_state_images = {
+    0: ImageTk.PhotoImage(Image.open("light_traffic.png").resize((150, 150), Image.LANCZOS)),
+    1: ImageTk.PhotoImage(Image.open("heavy_traffic.png").resize((150, 150), Image.LANCZOS))
+}
+traffic_state_image_label = tk.Label(root, bg="#2b2b2b")
+traffic_state_image_label.place(x=2250, y=40)
 
 # -----------------------------
 # 문구 박스 (차량 모드)
@@ -175,7 +187,7 @@ def uart_thread():
     global prev_pedestrian_state, prev_violation_state
     global red_left_time, green_left_time
 
-    ser = serial.Serial("COM15", 115200, timeout=0.01)
+    ser = serial.Serial("COM19", 115200, timeout=0.01)
     buf = bytearray()
     while True:
         data = ser.read(ser.in_waiting or 1)
@@ -184,6 +196,8 @@ def uart_thread():
             while len(buf) >= 12:
                 packet = buf[:12]
                 buf = buf[12:]
+                print("RX Packet (hex):", " ".join(f"{b:02X}" for b in packet))
+                # Header Check
                 if packet[0] != 0xAB:
                     buf = packet[1:] + buf
                     continue
@@ -256,13 +270,13 @@ def update_frame():
         camera_label.configure(image=imgtk)
 
     # -----------------------------
-    # 남은 시간 표시 (색상 판단)
+    # 남은 시간 표시
     # -----------------------------
     update_time_position()
     if display_mode == "vehicle":
         red_flag = traffic_state == 0
     else:
-        red_flag = traffic_state == 1  # 보행자 모드 반대
+        red_flag = traffic_state == 1
     if traffic_state == 0 and time.time() - last_red_time < 2:
         set_time_display(0, red=red_flag)
     elif traffic_state == 0:
@@ -288,6 +302,7 @@ def update_frame():
         violation_label.place_forget()
         ped_vehicle_label.place_forget()
 
+        # 차량 신호등
         if traffic_state == 0 and time.time() - last_red_time < 2:
             traffic_label.configure(image=traffic_images[1])
         elif traffic_state == 0:
@@ -296,14 +311,20 @@ def update_frame():
             traffic_label.configure(image=traffic_images[2])
             last_red_time = time.time()
 
+        # 무단횡단
         if now - ped_alert_start < 3:
             pedestrian_label.config(text=f"무단횡단: 발생", fg="red")
         else:
             pedestrian_label.config(text=f"무단횡단: {pedestrian_texts[pedestrian_state]}",
                                     fg=pedestrian_colors[pedestrian_state])
 
+        # 차량 흐름 텍스트
         vehicle_label.config(text=f"유동차량: {vehicle_texts[vehicle_state]}",
                              fg=vehicle_colors[vehicle_state])
+
+        # 차량 흐름 이미지 (light / heavy)
+        traffic_state_image_label.configure(image=traffic_state_images[vehicle_state])
+        traffic_state_image_label.place(x=2100, y=40)   # 차량 모드 위치
 
     else:
         ped_signal_label.place(x=1400, y=camera_y + 30)
@@ -331,6 +352,10 @@ def update_frame():
 
         ped_vehicle_label.config(text=f"유동차량: {vehicle_texts[vehicle_state]}",
                                  fg=vehicle_colors[vehicle_state])
+
+        # 보행자 모드에서도 차량 흐름 이미지 업데이트
+        traffic_state_image_label.configure(image=traffic_state_images[vehicle_state])
+        traffic_state_image_label.place(x=1650, y=1050)   # 차량 모드 위치
 
     root.after(30, update_frame)
 
